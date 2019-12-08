@@ -3,6 +3,12 @@ name = "tyozo"
 version = "0.1.0"
 authors = ["k-nasa <htilcs1115@gmail.com>"]
 edition = "2018"
+description = "Thread-safe in-memory kvs"
+keywords = ["tyozo", "kvs", "in-memory"]
+repository = "https://github.com/k-nasa/tyozo"
+documentation = "https://docs.rs/tyozo"
+license="MIT"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
