@@ -74,10 +74,27 @@ impl Lexer {
 }
 
 fn split_input<S: Into<String>>(input: S) -> Result<SplitedCommand, String> {
-    Ok(vec!["set", "key", "value hoge"]
-        .iter()
-        .map(ToString::to_string)
-        .collect())
+    let mut lexer = Lexer::new(input.into());
+
+    let mut splited_command = vec![];
+
+    lexer.read_char();
+
+    while !lexer.is_end() {
+        if lexer.current_ch() == '"' {
+            let literal = lexer.read_string_literal();
+            splited_command.push(literal.unwrap());
+        }
+
+        if is_letter(lexer.current_ch()) {
+            let ident = lexer.read_identifier();
+            splited_command.push(ident);
+        }
+
+        lexer.read_char();
+    }
+
+    Ok(splited_command)
 }
 
 fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
@@ -96,7 +113,32 @@ mod test {
         assert_eq!(
             split_input(r#"set "key" "value hoge""#),
             Ok(str_vec_to_splited_command(vec!["set", "key", "value hoge"]))
-        )
+        );
+
+        assert_eq!(
+            split_input(r#"set "key" value"#),
+            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
+        );
+
+        assert_eq!(
+            split_input(r#"set key "value""#),
+            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
+        );
+
+        assert_eq!(
+            split_input(r#""set" key value"#),
+            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
+        );
+
+        assert_eq!(
+            split_input(r#"set key value"#),
+            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
+        );
+
+        assert_eq!(
+            split_input(r#"set key        value"#),
+            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
+        );
     }
 
     #[test]
