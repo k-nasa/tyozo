@@ -5,8 +5,6 @@ pub enum Command {
     Set { key: String, value: String },
 }
 
-type SplitedCommand = Vec<String>;
-
 pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
     let input = split_input(input)?;
     parse_to_commnad(input)
@@ -25,6 +23,8 @@ fn parse_set_command(input: SplitedCommand) -> Result<Command, String> {
 
     Ok(Command::Set { key, value })
 }
+
+type SplitedCommand = Vec<String>;
 
 fn split_input<S: Into<String>>(input: S) -> Result<SplitedCommand, String> {
     let mut lexer = Lexer::new(input.into());
@@ -116,6 +116,36 @@ mod test {
         assert_eq!(
             split_input(r#"set key        value"#),
             Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
+        );
+    }
+
+    #[test]
+    fn test_split_input_include_delimiter() {
+        assert_eq!(
+            split_input(r#"set key-hoge value-hoge"#),
+            Ok(str_vec_to_splited_command(vec![
+                "set",
+                "key-hoge",
+                "value-hoge"
+            ]))
+        );
+
+        assert_eq!(
+            split_input(r#"set key+hoge value+hoge"#),
+            Ok(str_vec_to_splited_command(vec![
+                "set",
+                "key+hoge",
+                "value+hoge"
+            ]))
+        );
+
+        assert_eq!(
+            split_input(r#"set key|hoge value|hoge"#),
+            Ok(str_vec_to_splited_command(vec![
+                "set",
+                "key|hoge",
+                "value|hoge"
+            ]))
         );
     }
 
