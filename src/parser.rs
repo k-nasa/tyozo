@@ -119,6 +119,11 @@ mod test {
         );
     }
 
+    #[test]
+    fn test_split_input_error() {
+        assert!(split_input(r#"set key "value"#).is_err());
+    }
+
     fn str_vec_to_splited_command(input: Vec<&str>) -> SplitedCommand {
         input.iter().map(ToString::to_string).collect()
     }
