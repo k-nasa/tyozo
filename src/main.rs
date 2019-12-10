@@ -1,11 +1,12 @@
 mod lexer;
 mod parser;
 
-fn main() {
+fn main() -> Result<(), ()> {
     println!("Hello, world!");
+    tyozo("hoge")
 }
 
-fn tyozo<S: Into<String>>(input: S) -> Result<(), ()> {
+fn tyozo<S: Into<String>>(_input: S) -> Result<(), ()> {
     // TODO parse command
 
     // TODO exec command
