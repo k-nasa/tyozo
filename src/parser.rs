@@ -5,7 +5,7 @@ enum Command {
 
 type SplitedCommand = Vec<String>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Lexer {
     input: String,
     current_position: usize,
