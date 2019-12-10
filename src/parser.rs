@@ -3,6 +3,7 @@ use super::lexer::Lexer;
 #[derive(PartialEq, PartialOrd, Debug, Clone)]
 pub enum Command {
     Set { key: String, value: String },
+    SetNX { key: String, value: String },
     Get { key: String },
 }
 
@@ -20,6 +21,7 @@ fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
     let command = match &command_name.as_str() {
         &"set" => parse_set_command(input)?,
         &"get" => parse_get_command(input)?,
+        &"setnx" => parse_setnx_command(input)?,
         _ => return Err(String::from("unsupport command")),
     };
 
@@ -37,6 +39,24 @@ fn parse_get_command(input: SplitedCommand) -> Result<Command, String> {
     }
 
     Ok(Command::Get { key })
+}
+
+fn parse_setnx_command(input: SplitedCommand) -> Result<Command, String> {
+    let key = match input.get(1) {
+        None => return Err(String::from("not input key")),
+        Some(k) => k.to_string(),
+    };
+
+    let value = match input.get(2) {
+        None => return Err(String::from("not input value")),
+        Some(v) => v.to_string(),
+    };
+
+    if input.len() > 3 {
+        return Err(String::from("Invalid arguments"));
+    }
+
+    Ok(Command::SetNX { key, value })
 }
 
 fn parse_set_command(input: SplitedCommand) -> Result<Command, String> {
@@ -216,6 +236,19 @@ mod test {
         let output = parse_get_command(input);
         assert!(output.is_err());
         assert_eq!(output.unwrap_err(), "Invalid arguments");
+    }
+
+    #[test]
+    fn test_parse_setnx_command() {
+        let input = str_vec_to_splited_command(vec!["setnx", "key", "value"]);
+        let output = parse_setnx_command(input);
+        assert_eq!(
+            output,
+            Ok(Command::SetNX {
+                key: "key".into(),
+                value: "value".into()
+            })
+        );
     }
 
     fn str_vec_to_splited_command(input: Vec<&str>) -> SplitedCommand {
