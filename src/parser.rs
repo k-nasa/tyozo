@@ -104,6 +104,11 @@ fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
     })
 }
 
+fn is_letter(ch: char) -> bool {
+    const CHS: [char; 3] = ['|', '-', '+'];
+    'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || CHS.iter().any(|c| &ch == c)
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
