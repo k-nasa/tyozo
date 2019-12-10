@@ -5,6 +5,25 @@ enum Command {
 
 type SplitedCommand = Vec<String>;
 
+#[derive(Debug)]
+struct Lexer {
+    input: String,
+    current_position: usize,
+    read_position: usize,
+    current_ch: char,
+}
+
+impl Lexer {
+    pub fn new(input: String) -> Lexer {
+        Lexer {
+            input,
+            current_position: 0,
+            read_position: 0,
+            current_ch: '\0',
+        }
+    }
+}
+
 fn split_input<S: Into<String>>(input: S) -> Result<SplitedCommand, String> {
     Ok(vec!["set", "key", "value hoge"]
         .iter()
