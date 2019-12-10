@@ -18,7 +18,7 @@ impl Lexer {
         Lexer {
             input,
             current_position: 0,
-            read_position: 0,
+            read_position: 1,
             current_ch: '\0',
         }
     }
