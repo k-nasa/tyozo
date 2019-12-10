@@ -10,6 +10,20 @@ pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
     parse_to_commnad(input)
 }
 
+fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
+    let command_name = match input.get(0) {
+        None => return Err(String::from("not input command name")),
+        Some(c) => c,
+    };
+
+    let command = match &command_name.as_str() {
+        &"set" => parse_set_command(input)?,
+        _ => return Err(String::from("unsupport command")),
+    };
+
+    Ok(command)
+}
+
 fn parse_set_command(input: SplitedCommand) -> Result<Command, String> {
     let key = match input.get(1) {
         None => return Err(String::from("not input key")),
@@ -52,20 +66,6 @@ fn split_input<S: Into<String>>(input: S) -> Result<SplitedCommand, String> {
     }
 
     Ok(splited_command)
-}
-
-fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
-    let command_name = match input.get(0) {
-        None => return Err(String::from("not input command name")),
-        Some(c) => c,
-    };
-
-    let command = match &command_name.as_str() {
-        &"set" => parse_set_command(input)?,
-        _ => return Err(String::from("unsupport command")),
-    };
-
-    Ok(command)
 }
 
 fn is_letter(ch: char) -> bool {
