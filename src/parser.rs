@@ -37,10 +37,20 @@ fn split_input<S: Into<String>>(input: S) -> Result<SplitedCommand, String> {
 }
 
 fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
-    Ok(Command::Set {
-        key: input[1].clone(),
-        value: input[2].clone(),
-    })
+    let command_name = match input.get(0) {
+        None => return Err(String::from("not input command name")),
+        Some(c) => c,
+    };
+
+    let command = match &command_name.as_str() {
+        &"set" => Command::Set {
+            key: input[1].clone(),
+            value: input[2].clone(),
+        },
+        _ => return Err(String::from("unsupport command")),
+    };
+
+    Ok(command)
 }
 
 fn is_letter(ch: char) -> bool {
