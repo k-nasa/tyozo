@@ -19,5 +19,5 @@ fn tyozo<S: Into<String>>(input: S) -> Result<(), String> {
 
 #[test]
 fn test_tyozo() {
-    assert_eq!(tyozo(""), Ok(()))
+    assert_eq!(tyozo("set hoge hoge"), Ok(()))
 }
