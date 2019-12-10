@@ -43,7 +43,7 @@ fn parse_get_command(input: SplitedCommand) -> Result<Command, String> {
     Ok(Command::Get { key })
 }
 
-fn parse_setnx_command(input: SplitedCommand) -> Result<Command, String> {
+fn parse_set_command_common(input: SplitedCommand) -> Result<(String, String), String> {
     let key = match input.get(1) {
         None => return Err(String::from("not input key")),
         Some(k) => k.to_string(),
@@ -57,24 +57,18 @@ fn parse_setnx_command(input: SplitedCommand) -> Result<Command, String> {
     if input.len() > 3 {
         return Err(String::from("Invalid arguments"));
     }
+
+    Ok((key, value))
+}
+
+fn parse_setnx_command(input: SplitedCommand) -> Result<Command, String> {
+    let (key, value) = parse_set_command_common(input)?;
 
     Ok(Command::SetNX { key, value })
 }
 
 fn parse_set_command(input: SplitedCommand) -> Result<Command, String> {
-    let key = match input.get(1) {
-        None => return Err(String::from("not input key")),
-        Some(k) => k.to_string(),
-    };
-
-    let value = match input.get(2) {
-        None => return Err(String::from("not input value")),
-        Some(v) => v.to_string(),
-    };
-
-    if input.len() > 3 {
-        return Err(String::from("Invalid arguments"));
-    }
+    let (key, value) = parse_set_command_common(input)?;
 
     Ok(Command::Set { key, value })
 }
