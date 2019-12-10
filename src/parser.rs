@@ -130,7 +130,33 @@ mod test {
                 key: "key".into(),
                 value: "value".into()
             })
-        )
+        );
+
+        let input = str_vec_to_splited_command(vec!["setnx", "key", "value"]);
+
+        assert_eq!(
+            parse_to_commnad(input),
+            Ok(Command::SetNX {
+                key: "key".into(),
+                value: "value".into()
+            })
+        );
+
+        let input = str_vec_to_splited_command(vec!["get", "key"]);
+
+        assert_eq!(
+            parse_to_commnad(input),
+            Ok(Command::Get { key: "key".into() })
+        );
+
+        let input = str_vec_to_splited_command(vec!["del", "key", "key2"]);
+
+        assert_eq!(
+            parse_to_commnad(input),
+            Ok(Command::Del {
+                keys: str_vec_to_splited_command(vec!["key", "key2"])
+            })
+        );
     }
 
     #[test]
