@@ -45,6 +45,10 @@ impl Lexer {
         while self.current_ch != '"' {
             s.push(self.current_ch);
             self.read_char();
+
+            if self.is_end() {
+                return Err(String::from("failed to parse input, not found \""));
+            }
         }
 
         Ok(s)

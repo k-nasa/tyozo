@@ -36,7 +36,7 @@ fn split_input<S: Into<String>>(input: S) -> Result<SplitedCommand, String> {
     while !lexer.is_end() {
         if lexer.current_ch() == '"' {
             let literal = lexer.read_string_literal();
-            splited_command.push(literal.unwrap());
+            splited_command.push(literal?);
         }
 
         if is_letter(lexer.current_ch()) {
