@@ -12,6 +12,20 @@ pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
     parse_to_commnad(input)
 }
 
+fn parse_set_command(input: SplitedCommand) -> Result<Command, String> {
+    let key = match input.get(1) {
+        None => return Err(String::from("not input command name")),
+        Some(k) => k.to_string(),
+    };
+
+    let value = match input.get(2) {
+        None => return Err(String::from("not input command name")),
+        Some(v) => v.to_string(),
+    };
+
+    Ok(Command::Set { key, value })
+}
+
 fn split_input<S: Into<String>>(input: S) -> Result<SplitedCommand, String> {
     let mut lexer = Lexer::new(input.into());
 
@@ -50,20 +64,6 @@ fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
     Ok(command)
 }
 
-fn parse_set_command(input: SplitedCommand) -> Result<Command, String> {
-    let key = match input.get(1) {
-        None => return Err(String::from("not input command name")),
-        Some(k) => k.to_string(),
-    };
-
-    let value = match input.get(2) {
-        None => return Err(String::from("not input command name")),
-        Some(v) => v.to_string(),
-    };
-
-    Ok(Command::Set { key, value })
-}
-
 fn is_letter(ch: char) -> bool {
     const CHS: [char; 3] = ['|', '-', '+'];
     'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || CHS.iter().any(|c| &ch == c)
@@ -72,6 +72,19 @@ fn is_letter(ch: char) -> bool {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_parse_to_command() {
+        let input = str_vec_to_splited_command(vec!["set", "key", "value"]);
+
+        assert_eq!(
+            parse_to_commnad(input),
+            Ok(Command::Set {
+                key: "key".into(),
+                value: "value".into()
+            })
+        )
+    }
 
     #[test]
     fn test_split_input() {
@@ -104,19 +117,6 @@ mod test {
             split_input(r#"set key        value"#),
             Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
         );
-    }
-
-    #[test]
-    fn test_parse_to_command() {
-        let input = str_vec_to_splited_command(vec!["set", "key", "value"]);
-
-        assert_eq!(
-            parse_to_commnad(input),
-            Ok(Command::Set {
-                key: "key".into(),
-                value: "value".into()
-            })
-        )
     }
 
     fn str_vec_to_splited_command(input: Vec<&str>) -> SplitedCommand {
