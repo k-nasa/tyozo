@@ -12,14 +12,18 @@ pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
 
 fn parse_set_command(input: SplitedCommand) -> Result<Command, String> {
     let key = match input.get(1) {
-        None => return Err(String::from("not input command name")),
+        None => return Err(String::from("not input key")),
         Some(k) => k.to_string(),
     };
 
     let value = match input.get(2) {
-        None => return Err(String::from("not input command name")),
+        None => return Err(String::from("not input value")),
         Some(v) => v.to_string(),
     };
+
+    if input.len() > 3 {
+        return Err(String::from("Invalid arguments"));
+    }
 
     Ok(Command::Set { key, value })
 }
@@ -152,6 +156,24 @@ mod test {
     #[test]
     fn test_split_input_error() {
         assert!(split_input(r#"set key "value"#).is_err());
+    }
+
+    #[test]
+    fn test_parse_set_command() {
+        let input = str_vec_to_splited_command(vec!["set", "key"]);
+        let output = parse_set_command(input);
+        assert!(output.is_err());
+        assert_eq!(output.unwrap_err(), "not input value");
+
+        let input = str_vec_to_splited_command(vec!["set"]);
+        let output = parse_set_command(input);
+        assert!(output.is_err());
+        assert_eq!(output.unwrap_err(), "not input key");
+
+        let input = str_vec_to_splited_command(vec!["set", "key", "value", "invalid"]);
+        let output = parse_set_command(input);
+        assert!(output.is_err());
+        assert_eq!(output.unwrap_err(), "Invalid arguments");
     }
 
     fn str_vec_to_splited_command(input: Vec<&str>) -> SplitedCommand {
