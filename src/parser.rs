@@ -3,6 +3,7 @@ use super::lexer::Lexer;
 #[derive(PartialEq, PartialOrd, Debug, Clone)]
 pub enum Command {
     Set { key: String, value: String },
+    Get { key: String },
 }
 
 pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
@@ -18,10 +19,24 @@ fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
 
     let command = match &command_name.as_str() {
         &"set" => parse_set_command(input)?,
+        &"get" => parse_get_command(input)?,
         _ => return Err(String::from("unsupport command")),
     };
 
     Ok(command)
+}
+
+fn parse_get_command(input: SplitedCommand) -> Result<Command, String> {
+    let key = match input.get(1) {
+        None => return Err(String::from("not input key")),
+        Some(k) => k.to_string(),
+    };
+
+    if input.len() > 2 {
+        return Err(String::from("Invalid arguments"));
+    }
+
+    Ok(Command::Get { key })
 }
 
 fn parse_set_command(input: SplitedCommand) -> Result<Command, String> {
@@ -160,6 +175,16 @@ mod test {
 
     #[test]
     fn test_parse_set_command() {
+        let input = str_vec_to_splited_command(vec!["set", "key", "value"]);
+        let output = parse_set_command(input);
+        assert_eq!(
+            output,
+            Ok(Command::Set {
+                key: "key".into(),
+                value: "value".into()
+            })
+        );
+
         let input = str_vec_to_splited_command(vec!["set", "key"]);
         let output = parse_set_command(input);
         assert!(output.is_err());
@@ -172,6 +197,23 @@ mod test {
 
         let input = str_vec_to_splited_command(vec!["set", "key", "value", "invalid"]);
         let output = parse_set_command(input);
+        assert!(output.is_err());
+        assert_eq!(output.unwrap_err(), "Invalid arguments");
+    }
+
+    #[test]
+    fn test_parse_get_command() {
+        let input = str_vec_to_splited_command(vec!["get", "key"]);
+        let output = parse_get_command(input);
+        assert_eq!(output, Ok(Command::Get { key: "key".into() }));
+
+        let input = str_vec_to_splited_command(vec!["get"]);
+        let output = parse_get_command(input);
+        assert!(output.is_err());
+        assert_eq!(output.unwrap_err(), "not input key");
+
+        let input = str_vec_to_splited_command(vec!["get", "key", "invalid"]);
+        let output = parse_get_command(input);
         assert!(output.is_err());
         assert_eq!(output.unwrap_err(), "Invalid arguments");
     }
