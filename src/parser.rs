@@ -1,11 +1,16 @@
 use super::lexer::Lexer;
 
 #[derive(PartialEq, PartialOrd, Debug, Clone)]
-enum Command {
+pub enum Command {
     Set { key: String, value: String },
 }
 
 type SplitedCommand = Vec<String>;
+
+pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
+    let input = split_input(input)?;
+    parse_to_commnad(input)
+}
 
 fn split_input<S: Into<String>>(input: S) -> Result<SplitedCommand, String> {
     let mut lexer = Lexer::new(input.into());
