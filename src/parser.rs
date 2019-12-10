@@ -5,6 +5,7 @@ pub enum Command {
     Set { key: String, value: String },
     SetNX { key: String, value: String },
     Get { key: String },
+    Del { keys: Vec<String> },
 }
 
 pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
@@ -22,6 +23,7 @@ fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
         &"set" => parse_set_command(input)?,
         &"get" => parse_get_command(input)?,
         &"setnx" => parse_setnx_command(input)?,
+        &"del" => parse_del_command(input)?,
         _ => return Err(String::from("unsupport command")),
     };
 
@@ -75,6 +77,18 @@ fn parse_set_command(input: SplitedCommand) -> Result<Command, String> {
     }
 
     Ok(Command::Set { key, value })
+}
+
+fn parse_del_command(input: SplitedCommand) -> Result<Command, String> {
+    if input.len() < 2 {
+        return Err(String::from(
+            "ERR wrong number of arguments for 'del' command",
+        ));
+    }
+
+    Ok(Command::Del {
+        keys: input[1..].to_vec(),
+    })
 }
 
 type SplitedCommand = Vec<String>;
@@ -248,6 +262,34 @@ mod test {
                 key: "key".into(),
                 value: "value".into()
             })
+        );
+    }
+
+    #[test]
+    fn test_parse_del_command() {
+        let input = str_vec_to_splited_command(vec!["del", "key"]);
+        let output = parse_del_command(input);
+        assert_eq!(
+            output,
+            Ok(Command::Del {
+                keys: vec!["key".into()]
+            })
+        );
+
+        let input = str_vec_to_splited_command(vec!["del", "key1", "key2", "key3"]);
+        let output = parse_del_command(input);
+        assert_eq!(
+            output,
+            Ok(Command::Del {
+                keys: str_vec_to_splited_command(vec!["key1", "key2", "key3"])
+            })
+        );
+
+        let input = str_vec_to_splited_command(vec!["del"]);
+        let output = parse_del_command(input);
+        assert_eq!(
+            output.unwrap_err(),
+            String::from("ERR wrong number of arguments for 'del' command")
         );
     }
 
