@@ -122,104 +122,76 @@ mod test {
 
     #[test]
     fn test_parse_to_command() {
-        let input = str_vec_to_splited_command(vec!["set", "key", "value"]);
+        let test_case: Vec<(Vec<&str>, Result<Command, String>)> = vec![
+            (
+                vec!["set", "key", "value"],
+                Ok(Command::Set {
+                    key: "key".into(),
+                    value: "value".into(),
+                }),
+            ),
+            (
+                vec!["setnx", "key", "value"],
+                Ok(Command::SetNX {
+                    key: "key".into(),
+                    value: "value".into(),
+                }),
+            ),
+            (vec!["get", "key"], Ok(Command::Get { key: "key".into() })),
+            (
+                vec!["del", "key", "key2"],
+                Ok(Command::Del {
+                    keys: str_vec_to_splited_command(vec!["key", "key2"]),
+                }),
+            ),
+        ];
 
-        assert_eq!(
-            parse_to_commnad(input),
-            Ok(Command::Set {
-                key: "key".into(),
-                value: "value".into()
-            })
-        );
+        for (input, expect) in test_case {
+            let input = str_vec_to_splited_command(input);
 
-        let input = str_vec_to_splited_command(vec!["setnx", "key", "value"]);
-
-        assert_eq!(
-            parse_to_commnad(input),
-            Ok(Command::SetNX {
-                key: "key".into(),
-                value: "value".into()
-            })
-        );
-
-        let input = str_vec_to_splited_command(vec!["get", "key"]);
-
-        assert_eq!(
-            parse_to_commnad(input),
-            Ok(Command::Get { key: "key".into() })
-        );
-
-        let input = str_vec_to_splited_command(vec!["del", "key", "key2"]);
-
-        assert_eq!(
-            parse_to_commnad(input),
-            Ok(Command::Del {
-                keys: str_vec_to_splited_command(vec!["key", "key2"])
-            })
-        );
+            assert_eq!(parse_to_commnad(input), expect);
+        }
     }
 
     #[test]
     fn test_split_input() {
-        assert_eq!(
-            split_input(r#"set "key" "value hoge""#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value hoge"]))
-        );
+        let test_case = vec![
+            (
+                r#"set "key" "value hoge""#,
+                vec!["set", "key", "value hoge"],
+            ),
+            (r#"set "key" value"#, vec!["set", "key", "value"]),
+            (r#"set key "value""#, vec!["set", "key", "value"]),
+            (r#""set" key value"#, vec!["set", "key", "value"]),
+            (r#"set key value"#, vec!["set", "key", "value"]),
+            (r#"set key        value"#, vec!["set", "key", "value"]),
+        ];
 
-        assert_eq!(
-            split_input(r#"set "key" value"#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
-
-        assert_eq!(
-            split_input(r#"set key "value""#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
-
-        assert_eq!(
-            split_input(r#""set" key value"#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
-
-        assert_eq!(
-            split_input(r#"set key value"#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
-
-        assert_eq!(
-            split_input(r#"set key        value"#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
+        for (input, expect) in test_case {
+            assert_eq!(split_input(input), Ok(str_vec_to_splited_command(expect)))
+        }
     }
 
     #[test]
     fn test_split_input_include_delimiter() {
-        assert_eq!(
-            split_input(r#"set key-hoge value-hoge"#),
-            Ok(str_vec_to_splited_command(vec![
-                "set",
-                "key-hoge",
-                "value-hoge"
-            ]))
-        );
+        let test_case = vec![
+            (
+                r#"set key-hoge value-hoge"#,
+                vec!["set", "key-hoge", "value-hoge"],
+            ),
+            (
+                r#"set key+hoge value+hoge"#,
+                vec!["set", "key+hoge", "value+hoge"],
+            ),
+            (
+                r#"set key|hoge value|hoge"#,
+                vec!["set", "key|hoge", "value|hoge"],
+            ),
+        ];
 
-        assert_eq!(
-            split_input(r#"set key+hoge value+hoge"#),
-            Ok(str_vec_to_splited_command(vec![
-                "set",
-                "key+hoge",
-                "value+hoge"
-            ]))
-        );
-
-        assert_eq!(
-            split_input(r#"set key|hoge value|hoge"#),
-            Ok(str_vec_to_splited_command(vec![
-                "set",
-                "key|hoge",
-                "value|hoge"
-            ]))
-        );
+        for (input, expect) in test_case {
+            assert_eq!(split_input(input), Ok(str_vec_to_splited_command(expect)));
+        }
     }
 
     #[test]
@@ -238,44 +210,54 @@ mod test {
                 value: "value".into()
             })
         );
+    }
 
-        let input = str_vec_to_splited_command(vec!["set", "key"]);
-        let output = parse_set_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "not input value");
+    #[test]
+    fn test_parse_set_command_error() {
+        let test_case = vec![
+            (vec!["set", "key"], "not input value"),
+            (vec!["set"], "not input key"),
+            (vec!["set", "key", "value", "invalid"], "Invalid arguments"),
+        ];
 
-        let input = str_vec_to_splited_command(vec!["set"]);
-        let output = parse_set_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "not input key");
+        for (input, expect) in test_case {
+            let input = str_vec_to_splited_command(input);
+            let output = parse_set_command(input);
 
-        let input = str_vec_to_splited_command(vec!["set", "key", "value", "invalid"]);
-        let output = parse_set_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "Invalid arguments");
+            assert!(output.is_err());
+            assert_eq!(output.unwrap_err(), expect);
+        }
     }
 
     #[test]
     fn test_parse_get_command() {
         let input = str_vec_to_splited_command(vec!["get", "key"]);
         let output = parse_get_command(input);
+
         assert_eq!(output, Ok(Command::Get { key: "key".into() }));
+    }
 
-        let input = str_vec_to_splited_command(vec!["get"]);
-        let output = parse_get_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "not input key");
+    #[test]
+    fn test_parse_get_command_error() {
+        let test_case = vec![
+            (vec!["get"], "not input key"),
+            (vec!["get", "key", "invalid"], "Invalid arguments"),
+        ];
 
-        let input = str_vec_to_splited_command(vec!["get", "key", "invalid"]);
-        let output = parse_get_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "Invalid arguments");
+        for (input, expect) in test_case {
+            let input = str_vec_to_splited_command(input);
+            let output = parse_get_command(input);
+
+            assert!(output.is_err());
+            assert_eq!(output.unwrap_err(), expect);
+        }
     }
 
     #[test]
     fn test_parse_setnx_command() {
         let input = str_vec_to_splited_command(vec!["setnx", "key", "value"]);
         let output = parse_setnx_command(input);
+
         assert_eq!(
             output,
             Ok(Command::SetNX {
@@ -287,24 +269,31 @@ mod test {
 
     #[test]
     fn test_parse_del_command() {
-        let input = str_vec_to_splited_command(vec!["del", "key"]);
-        let output = parse_del_command(input);
-        assert_eq!(
-            output,
-            Ok(Command::Del {
-                keys: vec!["key".into()]
-            })
-        );
+        let test_case = vec![
+            (
+                vec!["del", "key"],
+                Ok(Command::Del {
+                    keys: vec!["key".into()],
+                }),
+            ),
+            (
+                vec!["del", "key1", "key2", "key3"],
+                Ok(Command::Del {
+                    keys: str_vec_to_splited_command(vec!["key1", "key2", "key3"]),
+                }),
+            ),
+        ];
 
-        let input = str_vec_to_splited_command(vec!["del", "key1", "key2", "key3"]);
-        let output = parse_del_command(input);
-        assert_eq!(
-            output,
-            Ok(Command::Del {
-                keys: str_vec_to_splited_command(vec!["key1", "key2", "key3"])
-            })
-        );
+        for (input, expected) in test_case {
+            let input = str_vec_to_splited_command(input);
+            let output = parse_del_command(input);
 
+            assert_eq!(output, expected);
+        }
+    }
+
+    #[test]
+    fn test_parse_del_command_error() {
         let input = str_vec_to_splited_command(vec!["del"]);
         let output = parse_del_command(input);
         assert_eq!(
