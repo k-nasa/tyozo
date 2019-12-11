@@ -174,32 +174,24 @@ mod test {
 
     #[test]
     fn test_split_input_include_delimiter() {
-        assert_eq!(
-            split_input(r#"set key-hoge value-hoge"#),
-            Ok(str_vec_to_splited_command(vec![
-                "set",
-                "key-hoge",
-                "value-hoge"
-            ]))
-        );
+        let test_case = vec![
+            (
+                r#"set key-hoge value-hoge"#,
+                vec!["set", "key-hoge", "value-hoge"],
+            ),
+            (
+                r#"set key+hoge value+hoge"#,
+                vec!["set", "key+hoge", "value+hoge"],
+            ),
+            (
+                r#"set key|hoge value|hoge"#,
+                vec!["set", "key|hoge", "value|hoge"],
+            ),
+        ];
 
-        assert_eq!(
-            split_input(r#"set key+hoge value+hoge"#),
-            Ok(str_vec_to_splited_command(vec![
-                "set",
-                "key+hoge",
-                "value+hoge"
-            ]))
-        );
-
-        assert_eq!(
-            split_input(r#"set key|hoge value|hoge"#),
-            Ok(str_vec_to_splited_command(vec![
-                "set",
-                "key|hoge",
-                "value|hoge"
-            ]))
-        );
+        for (input, expect) in test_case {
+            assert_eq!(split_input(input), Ok(str_vec_to_splited_command(expect)));
+        }
     }
 
     #[test]
