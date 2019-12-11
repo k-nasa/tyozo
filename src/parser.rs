@@ -233,17 +233,24 @@ mod test {
     fn test_parse_get_command() {
         let input = str_vec_to_splited_command(vec!["get", "key"]);
         let output = parse_get_command(input);
+
         assert_eq!(output, Ok(Command::Get { key: "key".into() }));
+    }
 
-        let input = str_vec_to_splited_command(vec!["get"]);
-        let output = parse_get_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "not input key");
+    #[test]
+    fn test_parse_get_command_error() {
+        let test_case = vec![
+            (vec!["get"], "not input key"),
+            (vec!["get", "key", "invalid"], "Invalid arguments"),
+        ];
 
-        let input = str_vec_to_splited_command(vec!["get", "key", "invalid"]);
-        let output = parse_get_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "Invalid arguments");
+        for (input, expect) in test_case {
+            let input = str_vec_to_splited_command(input);
+            let output = parse_get_command(input);
+
+            assert!(output.is_err());
+            assert_eq!(output.unwrap_err(), expect);
+        }
     }
 
     #[test]
