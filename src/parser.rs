@@ -122,41 +122,35 @@ mod test {
 
     #[test]
     fn test_parse_to_command() {
-        let input = str_vec_to_splited_command(vec!["set", "key", "value"]);
+        let test_case: Vec<(Vec<&str>, Result<Command, String>)> = vec![
+            (
+                vec!["set", "key", "value"],
+                Ok(Command::Set {
+                    key: "key".into(),
+                    value: "value".into(),
+                }),
+            ),
+            (
+                vec!["setnx", "key", "value"],
+                Ok(Command::SetNX {
+                    key: "key".into(),
+                    value: "value".into(),
+                }),
+            ),
+            (vec!["get", "key"], Ok(Command::Get { key: "key".into() })),
+            (
+                vec!["del", "key", "key2"],
+                Ok(Command::Del {
+                    keys: str_vec_to_splited_command(vec!["key", "key2"]),
+                }),
+            ),
+        ];
 
-        assert_eq!(
-            parse_to_commnad(input),
-            Ok(Command::Set {
-                key: "key".into(),
-                value: "value".into()
-            })
-        );
+        for (input, expect) in test_case {
+            let input = str_vec_to_splited_command(input);
 
-        let input = str_vec_to_splited_command(vec!["setnx", "key", "value"]);
-
-        assert_eq!(
-            parse_to_commnad(input),
-            Ok(Command::SetNX {
-                key: "key".into(),
-                value: "value".into()
-            })
-        );
-
-        let input = str_vec_to_splited_command(vec!["get", "key"]);
-
-        assert_eq!(
-            parse_to_commnad(input),
-            Ok(Command::Get { key: "key".into() })
-        );
-
-        let input = str_vec_to_splited_command(vec!["del", "key", "key2"]);
-
-        assert_eq!(
-            parse_to_commnad(input),
-            Ok(Command::Del {
-                keys: str_vec_to_splited_command(vec!["key", "key2"])
-            })
-        );
+            assert_eq!(parse_to_commnad(input), expect);
+        }
     }
 
     #[test]
