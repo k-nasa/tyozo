@@ -155,35 +155,21 @@ mod test {
 
     #[test]
     fn test_split_input() {
-        assert_eq!(
-            split_input(r#"set "key" "value hoge""#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value hoge"]))
-        );
+        let test_case = vec![
+            (
+                r#"set "key" "value hoge""#,
+                vec!["set", "key", "value hoge"],
+            ),
+            (r#"set "key" value"#, vec!["set", "key", "value"]),
+            (r#"set key "value""#, vec!["set", "key", "value"]),
+            (r#""set" key value"#, vec!["set", "key", "value"]),
+            (r#"set key value"#, vec!["set", "key", "value"]),
+            (r#"set key        value"#, vec!["set", "key", "value"]),
+        ];
 
-        assert_eq!(
-            split_input(r#"set "key" value"#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
-
-        assert_eq!(
-            split_input(r#"set key "value""#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
-
-        assert_eq!(
-            split_input(r#""set" key value"#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
-
-        assert_eq!(
-            split_input(r#"set key value"#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
-
-        assert_eq!(
-            split_input(r#"set key        value"#),
-            Ok(str_vec_to_splited_command(vec!["set", "key", "value"]))
-        );
+        for (input, expect) in test_case {
+            assert_eq!(split_input(input), Ok(str_vec_to_splited_command(expect)))
+        }
     }
 
     #[test]
