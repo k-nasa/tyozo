@@ -210,21 +210,23 @@ mod test {
                 value: "value".into()
             })
         );
+    }
 
-        let input = str_vec_to_splited_command(vec!["set", "key"]);
-        let output = parse_set_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "not input value");
+    #[test]
+    fn test_parse_set_command_error() {
+        let test_case = vec![
+            (vec!["set", "key"], "not input value"),
+            (vec!["set"], "not input key"),
+            (vec!["set", "key", "value", "invalid"], "Invalid arguments"),
+        ];
 
-        let input = str_vec_to_splited_command(vec!["set"]);
-        let output = parse_set_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "not input key");
+        for (input, expect) in test_case {
+            let input = str_vec_to_splited_command(input);
+            let output = parse_set_command(input);
 
-        let input = str_vec_to_splited_command(vec!["set", "key", "value", "invalid"]);
-        let output = parse_set_command(input);
-        assert!(output.is_err());
-        assert_eq!(output.unwrap_err(), "Invalid arguments");
+            assert!(output.is_err());
+            assert_eq!(output.unwrap_err(), expect);
+        }
     }
 
     #[test]
