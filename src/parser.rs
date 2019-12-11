@@ -257,6 +257,7 @@ mod test {
     fn test_parse_setnx_command() {
         let input = str_vec_to_splited_command(vec!["setnx", "key", "value"]);
         let output = parse_setnx_command(input);
+
         assert_eq!(
             output,
             Ok(Command::SetNX {
@@ -268,24 +269,31 @@ mod test {
 
     #[test]
     fn test_parse_del_command() {
-        let input = str_vec_to_splited_command(vec!["del", "key"]);
-        let output = parse_del_command(input);
-        assert_eq!(
-            output,
-            Ok(Command::Del {
-                keys: vec!["key".into()]
-            })
-        );
+        let test_case = vec![
+            (
+                vec!["del", "key"],
+                Ok(Command::Del {
+                    keys: vec!["key".into()],
+                }),
+            ),
+            (
+                vec!["del", "key1", "key2", "key3"],
+                Ok(Command::Del {
+                    keys: str_vec_to_splited_command(vec!["key1", "key2", "key3"]),
+                }),
+            ),
+        ];
 
-        let input = str_vec_to_splited_command(vec!["del", "key1", "key2", "key3"]);
-        let output = parse_del_command(input);
-        assert_eq!(
-            output,
-            Ok(Command::Del {
-                keys: str_vec_to_splited_command(vec!["key1", "key2", "key3"])
-            })
-        );
+        for (input, expected) in test_case {
+            let input = str_vec_to_splited_command(input);
+            let output = parse_del_command(input);
 
+            assert_eq!(output, expected);
+        }
+    }
+
+    #[test]
+    fn test_parse_del_command_error() {
         let input = str_vec_to_splited_command(vec!["del"]);
         let output = parse_del_command(input);
         assert_eq!(
