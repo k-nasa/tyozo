@@ -36,6 +36,10 @@ impl Memdb {
             .insert(key.as_ref().to_owned(), value.as_ref().to_owned());
     }
 
+    pub fn get(&mut self, key: impl AsRef<str>) -> Option<Vec<u8>> {
+        self.inner.get(&key.as_ref().to_owned()).cloned()
+    }
+
     pub fn inner(&self) -> &MemdbInner {
         &self.inner
     }
@@ -55,5 +59,16 @@ mod tests {
         // value is override
         memdb.set("key", "next value");
         assert_eq!(memdb.inner().get("key"), Some(&b"next value".to_vec()));
+    }
+
+    #[test]
+    fn test_memdb_get() {
+        let mut memdb = Memdb::new();
+
+        memdb.set("key", "value");
+
+        assert_eq!(memdb.get("key"), Some(b"value".to_vec()));
+
+        assert_eq!(memdb.get("not setted key"), None);
     }
 }
