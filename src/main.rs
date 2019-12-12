@@ -4,10 +4,11 @@ mod parser;
 use std::collections::HashMap;
 
 fn main() -> Result<(), String> {
-    tyozo("hoge")
+    let mut db = Memdb::new();
+    tyozo("hoge", &mut db)
 }
 
-fn tyozo<S: Into<String>>(input: S) -> Result<(), String> {
+fn tyozo<S: Into<String>>(input: S, db: &mut Memdb) -> Result<(), String> {
     let command = parser::parse(input)?;
 
     // TODO exec command
@@ -34,6 +35,17 @@ impl Memdb {
     pub fn set(&mut self, key: impl AsRef<str>, value: impl AsRef<[u8]>) {
         self.inner
             .insert(key.as_ref().to_owned(), value.as_ref().to_owned());
+    }
+
+    pub fn setnx(&mut self, key: impl AsRef<str>, value: impl AsRef<[u8]>) -> Result<(), String> {
+        if self.get(&key).is_some() {
+            return Err(String::from("ERR key is already exists"));
+        }
+
+        self.inner
+            .insert(key.as_ref().to_owned(), value.as_ref().to_owned());
+
+        Ok(())
     }
 
     pub fn get(&mut self, key: impl AsRef<str>) -> Option<Vec<u8>> {
@@ -66,6 +78,20 @@ mod tests {
         // value is override
         memdb.set("key", "next value");
         assert_eq!(memdb.inner().get("key"), Some(&b"next value".to_vec()));
+    }
+
+    #[test]
+    fn test_memdb_setnx() {
+        let mut memdb = Memdb::new();
+
+        let result = memdb.setnx("key", "value");
+        assert!(result.is_ok());
+        assert_eq!(memdb.inner().get("key"), Some(&b"value".to_vec()));
+
+        // value is not override
+        let result = memdb.setnx("key", "next value");
+        assert!(result.is_err());
+        assert_eq!(memdb.inner().get("key"), Some(&b"value".to_vec()));
     }
 
     #[test]
