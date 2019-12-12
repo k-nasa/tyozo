@@ -1,12 +1,5 @@
-use super::lexer::Lexer;
-
-#[derive(PartialEq, PartialOrd, Debug, Clone)]
-pub enum Command {
-    Set { key: String, value: String },
-    SetNX { key: String, value: String },
-    Get { key: String },
-    Del { keys: Vec<String> },
-}
+use crate::lexer::Lexer;
+use crate::Command;
 
 pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
     let input = split_input(input)?;
