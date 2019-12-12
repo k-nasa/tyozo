@@ -11,16 +11,6 @@ pub enum Command {
     Del { keys: Vec<String> },
 }
 
-pub fn tyozo<S: Into<String>>(input: S, db: &mut Memdb) -> Result<(), String> {
-    let command = parser::parse(input)?;
-
-    db.exec(command)?;
-
-    // TODO return exec result
-
-    Ok(())
-}
-
 type MemdbInner = HashMap<String, Vec<u8>>;
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -35,7 +25,13 @@ impl Memdb {
         }
     }
 
-    pub fn exec(&mut self, command: Command) -> Result<String, String> {
+    pub fn exec<S: Into<String>>(&mut self, input: S) -> Result<String, String> {
+        let command = parser::parse(input)?;
+
+        self.exec_command(command)
+    }
+
+    pub fn exec_command(&mut self, command: Command) -> Result<String, String> {
         match command {
             Command::Set { key, value } => {
                 self.set(key, value);

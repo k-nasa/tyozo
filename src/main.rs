@@ -1,6 +1,8 @@
-use tyozo::{tyozo, Memdb};
+use tyozo::Memdb;
 
 fn main() -> Result<(), String> {
     let mut db = Memdb::new();
-    tyozo("hoge", &mut db)
+    db.exec("hoge")?;
+
+    Ok(())
 }
