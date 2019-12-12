@@ -13,4 +13,10 @@ fn test_tyozo() {
     db.exec("set fuga value").unwrap();
     let result = db.exec("del hoge fuga");
     assert_eq!(result, Ok(String::from("2")));
+
+    let result = db.exec("setnx hoge value");
+    assert!(result.is_ok());
+
+    let result = db.exec("setnx hoge value");
+    assert!(result.is_err());
 }
