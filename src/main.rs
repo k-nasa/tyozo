@@ -40,6 +40,13 @@ impl Memdb {
         self.inner.get(&key.as_ref().to_owned()).cloned()
     }
 
+    pub fn del(&mut self, keys: Vec<impl AsRef<str>>) -> usize {
+        keys.into_iter()
+            .map(|key| self.inner.remove(&key.as_ref().to_owned()))
+            .filter(|v| v.is_some())
+            .count()
+    }
+
     pub fn inner(&self) -> &MemdbInner {
         &self.inner
     }
@@ -70,5 +77,19 @@ mod tests {
         assert_eq!(memdb.get("key"), Some(b"value".to_vec()));
 
         assert_eq!(memdb.get("not setted key"), None);
+    }
+
+    #[test]
+    fn test_memdb_delete() {
+        let mut memdb = Memdb::new();
+        memdb.set("key", "value");
+
+        let delete_count = memdb.del(vec!["key", "key2"]);
+
+        assert_eq!(delete_count, 1);
+        assert_eq!(memdb.get("key"), None);
+
+        let delete_count = memdb.del(vec!["key"]);
+        assert_eq!(delete_count, 0);
     }
 }
