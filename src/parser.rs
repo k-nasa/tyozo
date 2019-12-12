@@ -19,11 +19,11 @@ fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
         Some(c) => c,
     };
 
-    let command = match &command_name.as_str() {
-        &"set" => parse_set_command(input)?,
-        &"get" => parse_get_command(input)?,
-        &"setnx" => parse_setnx_command(input)?,
-        &"del" => parse_del_command(input)?,
+    let command = match command_name.as_str() {
+        "set" => parse_set_command(input)?,
+        "get" => parse_get_command(input)?,
+        "setnx" => parse_setnx_command(input)?,
+        "del" => parse_del_command(input)?,
         _ => return Err(String::from("unsupport command")),
     };
 
