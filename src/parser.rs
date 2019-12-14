@@ -1,12 +1,5 @@
-use super::lexer::Lexer;
-
-#[derive(PartialEq, PartialOrd, Debug, Clone)]
-pub enum Command {
-    Set { key: String, value: String },
-    SetNX { key: String, value: String },
-    Get { key: String },
-    Del { keys: Vec<String> },
-}
+use crate::lexer::Lexer;
+use crate::Command;
 
 pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
     let input = split_input(input)?;
@@ -19,11 +12,11 @@ fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
         Some(c) => c,
     };
 
-    let command = match &command_name.as_str() {
-        &"set" => parse_set_command(input)?,
-        &"get" => parse_get_command(input)?,
-        &"setnx" => parse_setnx_command(input)?,
-        &"del" => parse_del_command(input)?,
+    let command = match command_name.as_str() {
+        "set" => parse_set_command(input)?,
+        "get" => parse_get_command(input)?,
+        "setnx" => parse_setnx_command(input)?,
+        "del" => parse_del_command(input)?,
         _ => return Err(String::from("unsupport command")),
     };
 
