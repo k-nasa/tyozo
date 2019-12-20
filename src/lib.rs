@@ -200,20 +200,15 @@ impl Memdb {
         let mut inner = HashMap::new();
 
         while input.len() > position {
-            position = Memdb::deserialize_paier(&mut inner, input, position)?;
+            position += Memdb::deserialize_paier(&mut inner, &input[position..])?;
         }
 
         Ok(Memdb { inner })
     }
 
-    fn deserialize_paier(
-        inner: &mut MemdbInner,
-        input: &[u8],
-        position: usize,
-    ) -> Result<usize, String> {
-        let key_position = position + 8;
-
-        let key_length = match input.get(position..key_position) {
+    fn deserialize_paier(inner: &mut MemdbInner, input: &[u8]) -> Result<usize, String> {
+        let key_position = 8;
+        let key_length = match input.get(0..key_position) {
             None => return Err(String::from("ERR invalid database format")),
             Some(bytes) => usize::from_be_bytes([
                 // FIXME 絶対なにかいい方法がある！！
@@ -225,7 +220,6 @@ impl Memdb {
         let value_length = match input.get(key_position..value_position) {
             None => return Err(String::from("ERR invalid database format")),
             Some(bytes) => usize::from_be_bytes([
-                // FIXME 絶対なにかいい方法がある！！
                 bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
             ]),
         };
@@ -241,8 +235,6 @@ impl Memdb {
 
         inner.insert(key, value);
 
-        let next_position = value_position;
-
-        Ok(next_position)
+        Ok(value_position)
     }
 }
