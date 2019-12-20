@@ -154,4 +154,31 @@ impl Memdb {
     pub fn inner(&self) -> &MemdbInner {
         &self.inner
     }
+
+    /// # Example
+    /// ```
+    /// use tyozo::Memdb;
+    ///
+    /// let mut memdb = Memdb::new();
+    /// memdb.set("k", "v");
+    ///
+    /// let serialized = memdb.serialize();
+    ///
+    /// assert_eq!(serialized, vec![0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 107, 118]);
+    /// ```
+    pub fn serialize(self) -> Vec<u8> {
+        self.inner.iter().fold(vec![], |mut buf, (key, value)| {
+            let key_length_bytes = key.len().to_be_bytes();
+            let value_length_bytes = value.len().to_be_bytes();
+
+            buf.extend_from_slice(&key_length_bytes);
+            buf.extend_from_slice(&value_length_bytes);
+
+            buf.extend_from_slice(&key.as_bytes());
+            buf.extend_from_slice(&value);
+
+            buf
+        })
+    }
+
 }
