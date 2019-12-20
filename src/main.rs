@@ -1,9 +1,23 @@
 use ansi_term::Colour::Red;
+
+use std::io::prelude::*;
 use std::io::Write;
+
 use tyozo::Memdb;
 
-fn main() -> Result<(), String> {
-    let mut db = Memdb::new();
+const DB_FILE_PATH: &str = "./tyozo.db";
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // let mut f = std::fs::File::create(DB_FILE_PATH)?; // create or read
+    let mut f = std::fs::OpenOptions::new()
+        .append(true)
+        .read(true)
+        .open(DB_FILE_PATH)?;
+
+    let mut contents = String::new();
+    f.read_to_string(&mut contents)?;
+
+    let mut db = Memdb::deserialize(contents.as_bytes())?;
 
     loop {
         print!(">> ");
@@ -12,6 +26,9 @@ fn main() -> Result<(), String> {
         let input: String = read();
 
         if &input == "exit" {
+            let serialized = db.serialize();
+
+            f.write_all(&serialized)?;
             break;
         }
 
