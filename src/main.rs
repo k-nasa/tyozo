@@ -8,7 +8,6 @@ use tyozo::Memdb;
 const DB_FILE_PATH: &str = "./tyozo.db";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // let mut f = std::fs::File::create(DB_FILE_PATH)?; // create or read
     let mut f = std::fs::OpenOptions::new()
         .append(true)
         .read(true)
