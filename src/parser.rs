@@ -1,5 +1,5 @@
+use crate::command::Command;
 use crate::lexer::Lexer;
-use crate::Command;
 
 pub fn parse<S: Into<String>>(input: S) -> Result<Command, String> {
     let input = split_input(input)?;
