@@ -33,11 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _ = db.exec(log);
     });
 
-    // initialize log file
-    std::fs::OpenOptions::new()
-        .write(true)
-        .truncate(true)
-        .open(LOG_FILE_PATH)?;
+    file_clear(LOG_FILE_PATH)?;
 
     loop {
         print!(">> ");
@@ -51,11 +47,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             db_file.write_all(&serialized)?;
             db_file.flush()?;
 
-            // initialize log file
-            std::fs::OpenOptions::new()
-                .write(true)
-                .truncate(true)
-                .open(LOG_FILE_PATH)?;
+            file_clear(LOG_FILE_PATH)?;
 
             break;
         }
@@ -72,6 +64,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+fn file_clear(path: &str) -> Result<(), std::io::Error> {
+    std::fs::OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .open(path)
+        .map(|_| ())
 }
 
 fn read<T: std::str::FromStr>() -> T {
