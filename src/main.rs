@@ -11,6 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut f = std::fs::OpenOptions::new()
         .append(true)
         .read(true)
+        .create(true)
         .open(DB_FILE_PATH)?;
 
     let mut contents = String::new();
