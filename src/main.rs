@@ -9,22 +9,14 @@ const DB_FILE_PATH: &str = "./tyozo.db";
 const LOG_FILE_PATH: &str = "./tyozo.log";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut db_file = std::fs::OpenOptions::new()
-        .append(true)
-        .read(true)
-        .create(true)
-        .open(DB_FILE_PATH)?;
+    let mut db_file = open_or_create_file(DB_FILE_PATH)?;
 
     let mut contents = String::new();
     db_file.read_to_string(&mut contents)?;
 
     let mut db = Memdb::deserialize(contents.as_bytes())?;
 
-    let mut log_file = std::fs::OpenOptions::new()
-        .append(true)
-        .read(true)
-        .create(true)
-        .open(LOG_FILE_PATH)?;
+    let mut log_file = open_or_create_file(LOG_FILE_PATH)?;
 
     let mut logs = String::new();
     log_file.read_to_string(&mut logs)?;
@@ -72,6 +64,14 @@ fn file_clear(path: &str) -> Result<(), std::io::Error> {
         .truncate(true)
         .open(path)
         .map(|_| ())
+}
+
+fn open_or_create_file(path: &str) -> Result<std::fs::File, std::io::Error> {
+    std::fs::OpenOptions::new()
+        .append(true)
+        .read(true)
+        .create(true)
+        .open(path)
 }
 
 fn read<T: std::str::FromStr>() -> T {
