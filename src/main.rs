@@ -29,6 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let serialized = db.serialize();
 
             f.write_all(&serialized)?;
+            f.flush()?;
             break;
         }
 
