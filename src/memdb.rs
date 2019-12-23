@@ -62,6 +62,9 @@ impl Memdb {
                 let result = self.del(keys);
                 Ok(format!("{}", result))
             }
+            Command::Multi => todo!(),
+            Command::Exec => todo!(),
+            Command::Abort => todo!(),
         }
     }
 

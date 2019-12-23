@@ -4,4 +4,7 @@ pub enum Command {
     SetNX { key: String, value: String },
     Get { key: String },
     Del { keys: Vec<String> },
+    Multi,
+    Exec,
+    Abort,
 }

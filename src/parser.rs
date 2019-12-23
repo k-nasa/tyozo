@@ -17,6 +17,9 @@ fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
         "get" => parse_get_command(input)?,
         "setnx" => parse_setnx_command(input)?,
         "del" => parse_del_command(input)?,
+        "multi" => Command::Multi,
+        "exec" => Command::Exec,
+        "abort" => Command::Abort,
         _ => return Err(String::from("unknown command")),
     };
 
@@ -137,6 +140,9 @@ mod test {
                     keys: str_vec_to_splited_command(vec!["key", "key2"]),
                 }),
             ),
+            (vec!["multi"], Ok(Command::Multi)),
+            (vec!["exec"], Ok(Command::Exec)),
+            (vec!["abort"], Ok(Command::Abort)),
         ];
 
         for (input, expect) in test_case {
