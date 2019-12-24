@@ -42,7 +42,7 @@ impl Executor {
         input: S,
     ) -> Result<String, Box<dyn std::error::Error>> {
         let input = input.into();
-        let command = parser::parse(input.clone())?;
+        let command = parser::parse(input)?;
 
         if command == Command::Shutdown {
             let inner = self.inner.lock().unwrap();
@@ -60,10 +60,46 @@ impl Executor {
             return Ok("shutdown!!".to_string());
         }
 
-        writeln!(self.inner.lock().unwrap().log_file, "{}", input)?;
+        if command == Command::Multi {
+            self.to_transaction_mode();
+            return Ok("Start transaction".to_owned());
+        }
+
+        let output = match self.mode {
+            Mode::Nornal => self.exec_command_normal_mode(command),
+            Mode::Transaction => todo!(),
+        }?;
+
+        Ok(output)
+    }
+
+    fn exec_command_normal_mode(
+        &self,
+        command: Command,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        writeln!(
+            self.inner.lock().unwrap().log_file,
+            "{}",
+            command.to_string()
+        )?;
 
         let output = self.inner.lock().unwrap().memdb.exec_command(command)?;
 
         Ok(output)
+    }
+
+    fn exec_command_transaction_mode(
+        &self,
+        command: Command,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        todo!()
+    }
+
+    fn to_normal_mode(&mut self) {
+        self.mode = Mode::Nornal;
+    }
+
+    fn to_transaction_mode(&mut self) {
+        self.mode = Mode::Transaction;
     }
 }
