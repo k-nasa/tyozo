@@ -9,12 +9,19 @@ use crate::parser;
 #[derive(Clone)]
 pub struct Executor {
     inner: Arc<Mutex<ExecutorInner>>,
+    mode: Mode,
 }
 
 struct ExecutorInner {
     log_file: File,
     db_file: File,
     memdb: Memdb,
+}
+
+#[derive(Clone)]
+enum Mode {
+    Nornal,
+    Transaction,
 }
 
 impl Executor {
@@ -25,7 +32,9 @@ impl Executor {
             memdb,
         }));
 
-        Executor { inner }
+        let mode = Mode::Nornal;
+
+        Executor { inner, mode }
     }
 
     pub fn exec<S: Into<String>>(
