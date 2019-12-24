@@ -92,6 +92,9 @@ impl Executor {
             command.to_string()
         )?;
 
+        // TODO
+        // execが何かによらず write lockを取得してしまっている
+        // commandをW R 区別する。などの方法で write lockを常に取らないようにしたい
         let output = self.inner.memdb.write().unwrap().exec_command(command)?;
 
         Ok(output)
