@@ -9,4 +9,4 @@ server:
 cli:
 	cargo run --bin tyozo-cli
 fix:
-	cargo fix -Z unstable-options --clippy --allow-dirty
+	cargo fix --allow-dirty --allow-staged -Z unstable-options --clippy
