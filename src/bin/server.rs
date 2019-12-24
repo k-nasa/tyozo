@@ -4,7 +4,10 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
+use std::sync::Arc;
+use std::sync::Mutex;
 
+use tyozo::Executor;
 use tyozo::Memdb;
 
 const DB_FILE_PATH: &str = "./tyozo.db";
@@ -12,9 +15,7 @@ const LOG_FILE_PATH: &str = "./tyozo.log";
 
 fn handle_client(
     mut stream: TcpStream,
-    db: &mut Memdb,
-    db_file: &mut File,
-    log_file: &mut File,
+    mut executor: Executor,
 ) -> Result<(), Box<dyn std::error::Error>> {
     loop {
         let mut input = String::new();
@@ -26,30 +27,28 @@ fn handle_client(
             continue;
         }
 
-        if &input == "shutdown" {
-            let serialized = db.clone().serialize();
+        // if &input == "shutdown" {
+        //     let serialized = db.clone().serialize();
+        //
+        //     db_file.write_all(&serialized)?;
+        //     db_file.flush()?;
+        //
+        //     file_clear(LOG_FILE_PATH)?;
+        //
+        //     writeln!(stream, "shutdown")?;
+        //     break;
+        // }
+        //
+        // // logging
+        // writeln!(log_file, "{}", input)?;
 
-            db_file.write_all(&serialized)?;
-            db_file.flush()?;
-
-            file_clear(LOG_FILE_PATH)?;
-
-            writeln!(stream, "shutdown")?;
-            break;
-        }
-
-        // logging
-        writeln!(log_file, "{}", input)?;
-
-        let res = match db.exec(input) {
+        let res = match executor.exec(input) {
             Err(e) => format!("(error) {}", Red.bold().paint(e)),
             Ok(s) => format!("{}", s),
         };
 
         writeln!(stream, "{}", res)?;
     }
-
-    Ok(())
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -73,8 +72,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let listener = TcpListener::bind("127.0.0.1:3333")?;
 
+    let executor = Executor::new(log_file, db_file, db);
+
     for stream in listener.incoming() {
-        handle_client(stream?, &mut db, &mut db_file, &mut log_file)?;
+        let executor = executor.clone();
+        std::thread::spawn(|| match handle_client(stream.unwrap(), executor) {
+            Ok(()) => (),
+            Err(e) => eprintln!("{}", e),
+        });
     }
 
     Ok(())
