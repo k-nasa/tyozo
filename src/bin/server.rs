@@ -4,6 +4,7 @@ use std::io::prelude::*;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
 
+use tyozo::utils::fs_utils::{file_clear, open_or_create_file};
 use tyozo::Executor;
 use tyozo::Memdb;
 
@@ -24,23 +25,8 @@ fn handle_client(
             continue;
         }
 
-        // if &input == "shutdown" {
-        //     let serialized = db.clone().serialize();
-        //
-        //     db_file.write_all(&serialized)?;
-        //     db_file.flush()?;
-        //
-        //     file_clear(LOG_FILE_PATH)?;
-        //
-        //     writeln!(stream, "shutdown")?;
-        //     break;
-        // }
-        //
-        // // logging
-        // writeln!(log_file, "{}", input)?;
-
         let res = match executor.exec(input) {
-            Err(e) => format!("(error) {}", Red.bold().paint(e)),
+            Err(e) => format!("(error) {}", Red.bold().paint(e.to_string())),
             Ok(s) => s.to_string(),
         };
 
@@ -80,20 +66,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
-}
-
-fn file_clear(path: &str) -> Result<(), std::io::Error> {
-    std::fs::OpenOptions::new()
-        .write(true)
-        .truncate(true)
-        .open(path)
-        .map(|_| ())
-}
-
-fn open_or_create_file(path: &str) -> Result<std::fs::File, std::io::Error> {
-    std::fs::OpenOptions::new()
-        .append(true)
-        .read(true)
-        .create(true)
-        .open(path)
 }

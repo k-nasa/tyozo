@@ -7,4 +7,5 @@ pub enum Command {
     Multi,
     Exec,
     Abort,
+    Shutdown,
 }
