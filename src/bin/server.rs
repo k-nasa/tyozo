@@ -6,6 +6,7 @@ use std::net::{TcpListener, TcpStream};
 
 use tyozo::utils::fs_utils::{file_clear, open_or_create_file};
 use tyozo::Executor;
+use tyozo::Locks;
 use tyozo::Memdb;
 
 const DB_FILE_PATH: &str = "./tyozo.db";
@@ -55,7 +56,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let listener = TcpListener::bind("127.0.0.1:3333")?;
 
-    let executor = Executor::new(log_file, db_file, db);
+    let executor = Executor::new(log_file, db_file, db, Locks::new());
 
     for stream in listener.incoming() {
         let executor = executor.clone();

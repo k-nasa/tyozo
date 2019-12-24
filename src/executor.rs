@@ -3,6 +3,7 @@ use std::io::Write;
 use std::sync::{Arc, Mutex};
 
 use crate::command::Command;
+use crate::locks::Locks;
 use crate::memdb::Memdb;
 use crate::parser;
 
@@ -16,6 +17,7 @@ struct ExecutorInner {
     log_file: File,
     db_file: File,
     memdb: Memdb,
+    locks: Locks,
 }
 
 #[derive(Clone)]
@@ -25,11 +27,12 @@ enum Mode {
 }
 
 impl Executor {
-    pub fn new(log_file: File, db_file: File, memdb: Memdb) -> Executor {
+    pub fn new(log_file: File, db_file: File, memdb: Memdb, locks: Locks) -> Executor {
         let inner = Arc::new(Mutex::new(ExecutorInner {
             log_file,
             db_file,
             memdb,
+            locks,
         }));
 
         let mode = Mode::Nornal;
