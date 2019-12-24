@@ -48,7 +48,7 @@ impl Executor {
             // file_clear(log_file)?;
 
             drop(inner);
-            return Ok(format!("shutdown!!"));
+            return Ok("shutdown!!".to_string());
         }
 
         // logging

@@ -8,3 +8,5 @@ server:
 	cargo run --bin tyozo-server
 cli:
 	cargo run --bin tyozo-cli
+fix:
+	cargo fix -Z unstable-options --clippy
