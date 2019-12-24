@@ -43,9 +43,8 @@ impl Executor {
             db_file.write_all(&serialized)?;
             db_file.flush()?;
 
-            // TODO 動くようにする
-            // let _log_file = &inner.log_file;
-            // file_clear(log_file)?;
+            let log_file = &inner.log_file;
+            log_file.set_len(0)?;
 
             drop(inner);
             return Ok("shutdown!!".to_string());
