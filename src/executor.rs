@@ -88,14 +88,14 @@ impl Executor {
         Ok(output)
     }
 
-    fn exec_command_transaction_mode(
+    fn _exec_command_transaction_mode(
         &self,
-        command: Command,
+        _command: Command,
     ) -> Result<String, Box<dyn std::error::Error>> {
         todo!()
     }
 
-    fn to_normal_mode(&mut self) {
+    fn _to_normal_mode(&mut self) {
         self.mode = Mode::Nornal;
     }
 
