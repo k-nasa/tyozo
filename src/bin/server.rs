@@ -1,11 +1,8 @@
 use ansi_term::Colour::Red;
 
-use std::fs::File;
 use std::io::prelude::*;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
-use std::sync::Arc;
-use std::sync::Mutex;
 
 use tyozo::Executor;
 use tyozo::Memdb;
@@ -44,7 +41,7 @@ fn handle_client(
 
         let res = match executor.exec(input) {
             Err(e) => format!("(error) {}", Red.bold().paint(e)),
-            Ok(s) => format!("{}", s),
+            Ok(s) => s.to_string(),
         };
 
         writeln!(stream, "{}", res)?;
