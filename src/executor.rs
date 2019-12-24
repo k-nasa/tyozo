@@ -41,7 +41,8 @@ impl Executor {
         &mut self,
         input: S,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        let command = parser::parse(input)?;
+        let input = input.into();
+        let command = parser::parse(input.clone())?;
 
         if command == Command::Shutdown {
             let inner = self.inner.lock().unwrap();
@@ -59,8 +60,7 @@ impl Executor {
             return Ok("shutdown!!".to_string());
         }
 
-        // logging
-        // writeln!(self.inner.lock().unwrap().log_file, "{}", input.into())?;
+        writeln!(self.inner.lock().unwrap().log_file, "{}", input)?;
 
         let output = self.inner.lock().unwrap().memdb.exec_command(command)?;
 
