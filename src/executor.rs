@@ -6,7 +6,6 @@ use crate::command::Command;
 use crate::memdb::Memdb;
 use crate::parser;
 
-
 #[derive(Clone)]
 pub struct Executor {
     inner: Arc<Mutex<ExecutorInner>>,
@@ -40,12 +39,12 @@ impl Executor {
             let serialized = &inner.memdb.serialize();
 
             let mut db_file = &inner.db_file;
-            let _log_file = &inner.log_file;
 
             db_file.write_all(&serialized)?;
             db_file.flush()?;
 
             // TODO 動くようにする
+            // let _log_file = &inner.log_file;
             // file_clear(log_file)?;
 
             drop(inner);

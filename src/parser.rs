@@ -17,6 +17,7 @@ fn parse_to_commnad(input: SplitedCommand) -> Result<Command, String> {
         "get" => parse_get_command(input)?,
         "setnx" => parse_setnx_command(input)?,
         "del" => parse_del_command(input)?,
+        "shutdown" => Command::Shutdown,
         "multi" => Command::Multi,
         "exec" => Command::Exec,
         "abort" => Command::Abort,
