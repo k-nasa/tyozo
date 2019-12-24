@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::Write;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 
 use crate::command::Command;
 use crate::locks::Locks;
@@ -9,15 +9,15 @@ use crate::parser;
 
 #[derive(Clone)]
 pub struct Executor {
-    inner: Arc<Mutex<ExecutorInner>>,
+    inner: Arc<ExecutorInner>,
     mode: Mode,
 }
 
 struct ExecutorInner {
-    log_file: File,
-    db_file: File,
-    memdb: Memdb,
-    locks: Locks,
+    log_file: Mutex<File>,
+    db_file: Mutex<File>,
+    memdb: RwLock<Memdb>,
+    locks: RwLock<Locks>,
 }
 
 #[derive(Clone)]
@@ -28,12 +28,17 @@ enum Mode {
 
 impl Executor {
     pub fn new(log_file: File, db_file: File, memdb: Memdb, locks: Locks) -> Executor {
-        let inner = Arc::new(Mutex::new(ExecutorInner {
+        let log_file = Mutex::new(log_file);
+        let db_file = Mutex::new(db_file);
+        let memdb = RwLock::new(memdb);
+        let locks = RwLock::new(locks);
+
+        let inner = Arc::new(ExecutorInner {
             log_file,
             db_file,
             memdb,
             locks,
-        }));
+        });
 
         let mode = Mode::Nornal;
 
@@ -47,19 +52,20 @@ impl Executor {
         let input = input.into();
         let command = parser::parse(input)?;
 
+        // FIXME lock取得時のunwrap祭りをどうにかする
         if command == Command::Shutdown {
-            let inner = self.inner.lock().unwrap();
-            let serialized = &inner.memdb.serialize();
+            {
+                // lockをなる早で開放するためにブロックで囲っている
+                let serialized = self.inner.memdb.read().unwrap().serialize();
+                let mut db_file = self.inner.db_file.lock().unwrap();
 
-            let mut db_file = &inner.db_file;
+                db_file.write_all(&serialized)?;
+                db_file.flush()?;
+            }
 
-            db_file.write_all(&serialized)?;
-            db_file.flush()?;
-
-            let log_file = &inner.log_file;
+            let log_file = self.inner.log_file.lock().unwrap();
             log_file.set_len(0)?;
 
-            drop(inner);
             return Ok("shutdown!!".to_string());
         }
 
@@ -81,12 +87,12 @@ impl Executor {
         command: Command,
     ) -> Result<String, Box<dyn std::error::Error>> {
         writeln!(
-            self.inner.lock().unwrap().log_file,
+            self.inner.log_file.lock().unwrap(),
             "{}",
             command.to_string()
         )?;
 
-        let output = self.inner.lock().unwrap().memdb.exec_command(command)?;
+        let output = self.inner.memdb.write().unwrap().exec_command(command)?;
 
         Ok(output)
     }
