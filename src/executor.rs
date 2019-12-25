@@ -6,11 +6,13 @@ use crate::command::Command;
 use crate::locks::Locks;
 use crate::memdb::Memdb;
 use crate::parser;
+use crate::transaction::Transaction;
 
 #[derive(Clone)]
 pub struct Executor {
     inner: Arc<ExecutorInner>,
     mode: Mode,
+    transaction: Transaction,
 }
 
 struct ExecutorInner {
@@ -41,8 +43,13 @@ impl Executor {
         });
 
         let mode = Mode::Nornal;
+        let transaction = Transaction::new();
 
-        Executor { inner, mode }
+        Executor {
+            inner,
+            mode,
+            transaction,
+        }
     }
 
     pub fn exec<S: Into<String>>(

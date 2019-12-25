@@ -4,6 +4,7 @@ mod lexer;
 mod locks;
 mod memdb;
 mod parser;
+mod transaction;
 
 pub mod utils;
 
