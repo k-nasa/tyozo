@@ -5,7 +5,7 @@ use crate::command::Command;
 use crate::locks::Locks;
 use crate::memdb::Memdb;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Transaction {
     read_cache: HashMap<String, Vec<u8>>,
     write_cache: HashMap<String, Vec<u8>>,
