@@ -8,7 +8,6 @@ use crate::memdb::Memdb;
 use crate::parser;
 use crate::transaction::Transaction;
 
-#[derive(Clone)]
 pub struct Executor {
     inner: Arc<ExecutorInner>,
     mode: Mode,
@@ -22,7 +21,6 @@ struct ExecutorInner {
     locks: RwLock<Locks>,
 }
 
-#[derive(Clone)]
 enum Mode {
     Nornal,
     Transaction,
@@ -120,5 +118,15 @@ impl Executor {
 
     fn to_transaction_mode(&mut self) {
         self.mode = Mode::Transaction;
+    }
+}
+
+impl Clone for Executor {
+    fn clone(&self) -> Self {
+        Executor {
+            inner: self.inner.clone(),
+            mode: Mode::Nornal,
+            transaction: Transaction::new(),
+        }
     }
 }
