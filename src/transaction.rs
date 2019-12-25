@@ -1,8 +1,9 @@
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{Mutex, RwLock};
 
 use crate::command::Command;
 use crate::locks::Locks;
+use crate::memdb::Memdb;
 
 #[derive(Default)]
 pub struct Transaction {
@@ -24,6 +25,7 @@ impl Transaction {
         &mut self,
         command: Command,
         locks: &Mutex<Locks>,
+        memdb: &RwLock<Memdb>,
     ) -> Result<String, String> {
         match command {
             Command::Set { key, value } => {
@@ -32,19 +34,22 @@ impl Transaction {
                     locks.lock().unwrap().write_lock(&key);
                 }
 
-                self.set(key, value);
+                self.write_set(key, value);
                 Ok(String::from("OK"))
             }
 
             Command::Get { key } => {
-                // FIXME 共通処理
-                if let None = self.get(&key) {
-                    locks.lock().unwrap().read_lock(&key);
-                }
+                locks.lock().unwrap().read_lock(&key);
 
-                match self.get(key) {
-                    None => Ok(String::from("None")),
-                    Some(v) => Ok(String::from_utf8(v).unwrap()),
+                match self.get(&key) {
+                    None => {
+                        locks.lock().unwrap().read_unlock(&key);
+                        Ok(String::from("None"))
+                    }
+                    Some(v) => {
+                        self.read_set(key, v.clone());
+                        Ok(String::from_utf8(v).unwrap())
+                    }
                 }
             }
             Command::Del { keys } => {
@@ -58,13 +63,38 @@ impl Transaction {
                 let result = self.del(keys);
                 Ok(format!("{}", result))
             }
-            Command::Exec => todo!(),
-            Command::Abort => todo!(),
+            Command::Exec => {
+                self.read_cache.keys().for_each(|k| {
+                    locks.lock().unwrap().read_unlock(k);
+                });
+
+                let mut db = memdb.write().unwrap();
+
+                self.write_cache.iter().for_each(|(k, v)| {
+                    db.set(k, v);
+                    locks.lock().unwrap().write_unlock(k);
+                });
+
+                self.read_cache = HashMap::new();
+                self.write_cache = HashMap::new();
+
+                Ok(String::from("OK"))
+            }
+            Command::Abort => {
+                self.clear_lock(locks);
+
+                Ok(String::from("Abort transaction"))
+            }
             _ => Err(String::from("ERR unsupport transaction command")),
         }
     }
 
-    fn set(&mut self, key: impl AsRef<str>, value: impl AsRef<[u8]>) {
+    fn read_set(&mut self, key: impl AsRef<str>, value: impl AsRef<[u8]>) {
+        self.read_cache
+            .insert(key.as_ref().to_owned(), value.as_ref().to_owned());
+    }
+
+    fn write_set(&mut self, key: impl AsRef<str>, value: impl AsRef<[u8]>) {
         self.write_cache
             .insert(key.as_ref().to_owned(), value.as_ref().to_owned());
     }
@@ -86,5 +116,24 @@ impl Transaction {
             .map(|key| self.write_cache.remove(&key.as_ref().to_owned()))
             .filter(|v| v.is_some())
             .count()
+    }
+
+    pub fn clear_lock(&mut self, locks: &Mutex<Locks>) {
+        self.read_cache.keys().for_each(|k| {
+            locks.lock().unwrap().read_unlock(k);
+        });
+
+        self.write_cache.keys().for_each(|k| {
+            locks.lock().unwrap().write_unlock(k);
+        });
+
+        self.read_cache = HashMap::new();
+        self.write_cache = HashMap::new();
+    }
+}
+
+impl Drop for Transaction {
+    fn drop(&mut self) {
+        println!("transaction drop!!");
     }
 }

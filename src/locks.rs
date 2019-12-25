@@ -63,22 +63,6 @@ impl Locks {
         }
     }
 
-    pub fn write_unlock(&mut self, key: &str) {
-        // FIXME refactor this method
-        // Resultを返すようにしましょう
-
-        let mut hashmap = self.hashmap.lock().unwrap();
-
-        if let Some(lock) = hashmap.get_mut(key) {
-            match lock {
-                RWLock::Write => hashmap.remove(key),
-                RWLock::Read(_) => panic!("Attempting to release read lock"),
-            };
-        } else {
-            panic!("not found write lock")
-        }
-    }
-
     pub fn write_lock(&mut self, key: &str) {
         // FIXME read lock の開放をループで待って良いのか？という気持ち
         loop {
@@ -96,6 +80,22 @@ impl Locks {
                 hashmap.insert(key.to_owned(), RWLock::Write);
                 break;
             }
+        }
+    }
+
+    pub fn write_unlock(&mut self, key: &str) {
+        // FIXME refactor this method
+        // Resultを返すようにしましょう
+
+        let mut hashmap = self.hashmap.lock().unwrap();
+
+        if let Some(lock) = hashmap.get_mut(key) {
+            match lock {
+                RWLock::Write => hashmap.remove(key),
+                RWLock::Read(_) => panic!("Attempting to release read lock"),
+            };
+        } else {
+            panic!("not found write lock")
         }
     }
 }

@@ -21,6 +21,7 @@ struct ExecutorInner {
     memdb: RwLock<Memdb>,
 }
 
+#[derive(Debug)]
 enum Mode {
     Nornal,
     Transaction,
@@ -109,11 +110,15 @@ impl Executor {
         &mut self,
         command: Command,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        if command == Command::Exec && command == Command::Abort {
-            self.to_normal_mode();
-        }
+        println!("exec transaction mode");
+        let output =
+            self.transaction
+                .exec_command(command.clone(), &self.inner.locks, &self.inner.memdb)?;
 
-        let output = self.transaction.exec_command(command, &self.inner.locks)?;
+        if command == Command::Exec || command == Command::Abort {
+            self.to_normal_mode();
+            self.transaction.clear_lock(&self.inner.locks);
+        }
 
         Ok(output)
     }
