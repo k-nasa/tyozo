@@ -17,8 +17,8 @@ pub struct Executor {
 struct ExecutorInner {
     log_file: Mutex<File>,
     db_file: Mutex<File>,
+    locks: Mutex<Locks>,
     memdb: RwLock<Memdb>,
-    locks: RwLock<Locks>,
 }
 
 enum Mode {
@@ -30,14 +30,14 @@ impl Executor {
     pub fn new(log_file: File, db_file: File, memdb: Memdb, locks: Locks) -> Executor {
         let log_file = Mutex::new(log_file);
         let db_file = Mutex::new(db_file);
+        let locks = Mutex::new(locks);
         let memdb = RwLock::new(memdb);
-        let locks = RwLock::new(locks);
 
         let inner = Arc::new(ExecutorInner {
             log_file,
             db_file,
-            memdb,
             locks,
+            memdb,
         });
 
         let mode = Mode::Nornal;
