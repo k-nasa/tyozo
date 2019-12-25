@@ -110,7 +110,6 @@ impl Executor {
         &mut self,
         command: Command,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        println!("exec transaction mode");
         let output =
             self.transaction
                 .exec_command(command.clone(), &self.inner.locks, &self.inner.memdb)?;

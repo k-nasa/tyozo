@@ -23,7 +23,7 @@ fn handle_client(
         let n = read_buf.read_line(&mut input)?;
 
         if n == 0 {
-            continue;
+            break Ok(());
         }
 
         let res = match executor.exec(input) {
