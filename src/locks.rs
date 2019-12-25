@@ -24,6 +24,7 @@ impl Locks {
 
     pub fn read_lock(&mut self, key: &str) {
         // FIXME Write lock の開放をループで待って良いのか？という気持ち
+
         loop {
             let mut hashmap = self.hashmap.lock().unwrap();
 
@@ -45,7 +46,7 @@ impl Locks {
 
         let mut hashmap = self.hashmap.lock().unwrap();
 
-        if let Some(lock) = hashmap.get_mut(key.clone()) {
+        if let Some(lock) = hashmap.get_mut(key) {
             match lock {
                 RWLock::Read(count) => {
                     *count -= 1;
@@ -65,7 +66,7 @@ impl Locks {
 
         let mut hashmap = self.hashmap.lock().unwrap();
 
-        if let Some(lock) = hashmap.get_mut(key.clone()) {
+        if let Some(lock) = hashmap.get_mut(key) {
             match lock {
                 RWLock::Write => hashmap.remove(key),
                 RWLock::Read(_) => panic!("Attempting to release read lock"),
@@ -80,7 +81,7 @@ impl Locks {
         loop {
             let mut hashmap = self.hashmap.lock().unwrap();
 
-            if let Some(lock) = hashmap.get_mut(key.clone()) {
+            if let Some(lock) = hashmap.get_mut(key) {
                 match lock {
                     RWLock::Read(0) => {
                         hashmap.insert(key.to_owned(), RWLock::Write);
