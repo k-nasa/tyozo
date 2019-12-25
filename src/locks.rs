@@ -152,3 +152,37 @@ fn test_write_unlock() {
     let hashmap = locks.hashmap.lock().unwrap();
     assert!(hashmap.get(key).is_none());
 }
+
+#[test]
+#[should_panic]
+fn test_write_unlock_panic_when_not_found_key() {
+    let mut locks = Locks::new();
+
+    locks.write_unlock("not found key");
+}
+
+#[test]
+#[should_panic]
+fn test_write_unlock_panic_when_read_lock() {
+    let mut locks = Locks::new();
+
+    locks.read_lock("key");
+    locks.write_unlock("key");
+}
+
+#[test]
+#[should_panic]
+fn test_read_unlock_panic_when_not_found_key() {
+    let mut locks = Locks::new();
+
+    locks.read_unlock("not found key");
+}
+
+#[test]
+#[should_panic]
+fn test_write_unlock_panic_when_write_lock() {
+    let mut locks = Locks::new();
+
+    locks.write_lock("key");
+    locks.read_unlock("key");
+}
