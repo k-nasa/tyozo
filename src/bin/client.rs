@@ -20,8 +20,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         writeln!(stream, "{}", input)?;
         stream.flush()?;
 
-        println!("write");
-
         let mut buf = String::new();
 
         let mut stream_reader = std::io::BufReader::new(&stream);
