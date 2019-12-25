@@ -113,7 +113,7 @@ impl Executor {
             self.to_normal_mode();
         }
 
-        let output = self.transaction.exec_command(command)?;
+        let output = self.transaction.exec_command(command, &self.inner.locks)?;
 
         Ok(output)
     }
