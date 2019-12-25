@@ -40,6 +40,41 @@ impl Locks {
         }
     }
 
+    pub fn read_unlock(&mut self, key: &str) {
+        // TODO refactor this method
+
+        let mut hashmap = self.hashmap.lock().unwrap();
+
+        if let Some(lock) = hashmap.get_mut(key.clone()) {
+            match lock {
+                RWLock::Read(count) => {
+                    *count -= 1;
+                    if *count == 0 {
+                        hashmap.remove(key);
+                    }
+                }
+                RWLock::Write => panic!("Attempting to release write lock"),
+            };
+        } else {
+            panic!("not found read lock")
+        }
+    }
+
+    pub fn write_unlock(&mut self, key: &str) {
+        // TODO refactor this method
+
+        let mut hashmap = self.hashmap.lock().unwrap();
+
+        if let Some(lock) = hashmap.get_mut(key.clone()) {
+            match lock {
+                RWLock::Write => hashmap.remove(key),
+                RWLock::Read(_) => panic!("Attempting to release read lock"),
+            };
+        } else {
+            panic!("not found write lock")
+        }
+    }
+
     pub fn write_lock(&mut self, key: &str) {
         // FIXME read lock の開放をループで待って良いのか？という気持ち
         loop {
