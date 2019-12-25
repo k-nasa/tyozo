@@ -114,6 +114,19 @@ fn test_read_lock() {
 }
 
 #[test]
+fn test_read_unlock() {
+    let mut locks = Locks::new();
+
+    let key = "key";
+
+    locks.read_lock(key);
+    locks.read_unlock(key);
+
+    let hashmap = locks.hashmap.lock().unwrap();
+    assert!(hashmap.get(key).is_none());
+}
+
+#[test]
 fn test_write_lock() {
     let mut locks = Locks::new();
 
@@ -125,4 +138,17 @@ fn test_write_lock() {
     let lock = hashmap.get(key).unwrap();
 
     assert_eq!(lock, &RWLock::Write);
+}
+
+#[test]
+fn test_write_unlock() {
+    let mut locks = Locks::new();
+
+    let key = "key";
+
+    locks.write_lock(key);
+    locks.write_unlock(key);
+
+    let hashmap = locks.hashmap.lock().unwrap();
+    assert!(hashmap.get(key).is_none());
 }
