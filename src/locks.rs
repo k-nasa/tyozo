@@ -43,7 +43,8 @@ impl Locks {
     }
 
     pub fn read_unlock(&mut self, key: &str) {
-        // TODO refactor this method
+        // FIXME refactor this method
+        // Resultを返すようにしましょう
 
         let mut hashmap = self.hashmap.lock().unwrap();
 
@@ -63,7 +64,8 @@ impl Locks {
     }
 
     pub fn write_unlock(&mut self, key: &str) {
-        // TODO refactor this method
+        // FIXME refactor this method
+        // Resultを返すようにしましょう
 
         let mut hashmap = self.hashmap.lock().unwrap();
 
