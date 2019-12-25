@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
+#[derive(Default, Debug)]
 pub struct Locks {
     // NOTE sync::RwLock で出来そうだが
     // ライフタイムの関係で今の自分の実力ではよく分からなかったので
