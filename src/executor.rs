@@ -81,7 +81,7 @@ impl Executor {
 
         let output = match self.mode {
             Mode::Nornal => self.exec_command_normal_mode(command),
-            Mode::Transaction => todo!(),
+            Mode::Transaction => self.exec_command_transaction_mode(command),
         }?;
 
         Ok(output)
@@ -105,14 +105,20 @@ impl Executor {
         Ok(output)
     }
 
-    fn _exec_command_transaction_mode(
-        &self,
-        _command: Command,
+    fn exec_command_transaction_mode(
+        &mut self,
+        command: Command,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        todo!()
+        if command == Command::Exec && command == Command::Abort {
+            self.to_normal_mode();
+        }
+
+        let output = self.transaction.exec_command(command)?;
+
+        Ok(output)
     }
 
-    fn _to_normal_mode(&mut self) {
+    fn to_normal_mode(&mut self) {
         self.mode = Mode::Nornal;
     }
 
