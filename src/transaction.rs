@@ -38,20 +38,21 @@ impl Transaction {
                 Ok(String::from("OK"))
             }
 
-            Command::Get { key } => {
-                locks.lock().unwrap().read_lock(&key);
-
-                match self.get(&key) {
-                    None => {
-                        locks.lock().unwrap().read_unlock(&key);
-                        Ok(String::from("None"))
-                    }
+            Command::Get { key } => match self.get(&key) {
+                None => match memdb.read().unwrap().get(&key) {
+                    None => Ok("None".to_owned()),
                     Some(v) => {
+                        locks.lock().unwrap().read_lock(&key);
+
                         self.read_set(key, v.clone());
                         Ok(String::from_utf8(v).unwrap())
                     }
+                },
+                Some(v) => {
+                    self.read_set(key, v.clone());
+                    Ok(String::from_utf8(v).unwrap())
                 }
-            }
+            },
             Command::Del { keys } => {
                 keys.iter().for_each(|key| {
                     // FIXME 共通処理
@@ -129,11 +130,5 @@ impl Transaction {
 
         self.read_cache = HashMap::new();
         self.write_cache = HashMap::new();
-    }
-}
-
-impl Drop for Transaction {
-    fn drop(&mut self) {
-        println!("transaction drop!!");
     }
 }

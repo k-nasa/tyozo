@@ -122,7 +122,7 @@ impl Memdb {
     ///
     /// assert_eq!(memdb.get("not setted key"), None);
     /// ```
-    pub fn get(&mut self, key: impl AsRef<str>) -> Option<Vec<u8>> {
+    pub fn get(&self, key: impl AsRef<str>) -> Option<Vec<u8>> {
         self.inner.get(&key.as_ref().to_owned()).cloned()
     }
 

@@ -140,3 +140,9 @@ impl Clone for Executor {
         }
     }
 }
+
+impl Drop for Executor {
+    fn drop(&mut self) {
+        self.transaction.clear_lock(&self.inner.locks);
+    }
+}
