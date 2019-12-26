@@ -17,3 +17,11 @@ documentation = "https://docs.rs/tyozo"
 
 [dependencies]
 ansi_term = "0.12.1"
+
+[[bin]]
+name = "tyozo-cli"
+path = "src/bin/client.rs"
+
+[[bin]]
+name = "tyozo-server"
+path = "src/bin/server.rs"

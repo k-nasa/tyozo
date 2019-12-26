@@ -62,6 +62,10 @@ impl Memdb {
                 let result = self.del(keys);
                 Ok(format!("{}", result))
             }
+            Command::Multi => todo!(),
+            Command::Exec => todo!(),
+            Command::Abort => todo!(),
+            _ => unreachable!(),
         }
     }
 
@@ -118,7 +122,7 @@ impl Memdb {
     ///
     /// assert_eq!(memdb.get("not setted key"), None);
     /// ```
-    pub fn get(&mut self, key: impl AsRef<str>) -> Option<Vec<u8>> {
+    pub fn get(&self, key: impl AsRef<str>) -> Option<Vec<u8>> {
         self.inner.get(&key.as_ref().to_owned()).cloned()
     }
 
@@ -158,7 +162,7 @@ impl Memdb {
     ///
     /// assert_eq!(serialized, vec![0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 107, 118]);
     /// ```
-    pub fn serialize(self) -> Vec<u8> {
+    pub fn serialize(&self) -> Vec<u8> {
         self.inner.iter().fold(vec![], |mut buf, (key, value)| {
             let key_length_bytes = key.len().to_be_bytes();
             let value_length_bytes = value.len().to_be_bytes();
