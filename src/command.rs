@@ -18,7 +18,11 @@ impl ToString for Command {
             Set { key, value } => format!("set {} {}", key, value),
             SetNX { key, value } => format!("setnx {} {}", key, value),
             Get { key } => format!("get {}", key),
-            Del { .. } => todo!(),
+            Del { keys } => format!(
+                "del {}",
+                keys.iter()
+                    .fold(String::new(), |acc, s| format!("{} {}", acc, s))
+            ),
             _ => todo!(),
         }
     }
