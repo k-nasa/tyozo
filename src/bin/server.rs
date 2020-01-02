@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 use ansi_term::Colour::Red;
 
 use std::io::prelude::*;
@@ -26,6 +29,8 @@ fn handle_client(
             break Ok(());
         }
 
+        info!("received input: {}", input);
+
         let res = match executor.exec(input) {
             Err(e) => format!("(error) {}", Red.bold().paint(e.to_string())),
             Ok(s) => s.to_string(),
@@ -36,6 +41,8 @@ fn handle_client(
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
+
     let db_file = open_or_create_file(DB_FILE_PATH)?;
     let log_file = open_or_create_file(LOG_FILE_PATH)?;
     let db = Memdb::restore(DB_FILE_PATH, LOG_FILE_PATH)?;

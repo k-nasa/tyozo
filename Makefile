@@ -5,7 +5,7 @@ run:
 test:
 	cargo test
 server:
-	cargo run --bin tyozo-server
+	RUST_LOG=info cargo run --bin tyozo-server
 cli:
 	cargo run --bin tyozo-cli
 fix:
