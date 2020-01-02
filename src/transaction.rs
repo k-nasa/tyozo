@@ -30,7 +30,7 @@ impl Transaction {
         match command {
             Command::Set { key, value } => {
                 // FIXME 共通処理
-                if let None = self.get(&key) {
+                if self.get(&key).is_none() {
                     locks.lock().unwrap().write_lock(&key);
                 }
 
@@ -56,7 +56,7 @@ impl Transaction {
             Command::Del { keys } => {
                 keys.iter().for_each(|key| {
                     // FIXME 共通処理
-                    if let None = self.get(&key) {
+                    if self.get(&key).is_none() {
                         locks.lock().unwrap().read_lock(&key);
                     }
                 });

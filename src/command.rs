@@ -18,7 +18,7 @@ impl ToString for Command {
             Set { key, value } => format!("set {} {}", key, value),
             SetNX { key, value } => format!("setnx {} {}", key, value),
             Get { key } => format!("get {}", key),
-            Del { keys: _ } => todo!(),
+            Del { .. } => todo!(),
             _ => todo!(),
         }
     }

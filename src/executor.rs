@@ -76,7 +76,7 @@ impl Executor {
         }
 
         if command == Command::Multi {
-            self.to_transaction_mode();
+            self.as_transaction_mode();
             return Ok("Start transaction".to_owned());
         }
 
@@ -115,18 +115,18 @@ impl Executor {
                 .exec_command(command.clone(), &self.inner.locks, &self.inner.memdb)?;
 
         if command == Command::Exec || command == Command::Abort {
-            self.to_normal_mode();
+            self.as_normal_mode();
             self.transaction.clear_lock(&self.inner.locks);
         }
 
         Ok(output)
     }
 
-    fn to_normal_mode(&mut self) {
+    fn as_normal_mode(&mut self) {
         self.mode = Mode::Nornal;
     }
 
-    fn to_transaction_mode(&mut self) {
+    fn as_transaction_mode(&mut self) {
         self.mode = Mode::Transaction;
     }
 }
