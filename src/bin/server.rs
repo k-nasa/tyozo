@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
 
-use tyozo::utils::fs_utils::{file_clear, open_or_create_file};
+use tyozo::utils::fs_utils::open_or_create_file;
 use tyozo::Executor;
 use tyozo::Locks;
 use tyozo::Memdb;
@@ -36,23 +36,9 @@ fn handle_client(
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut db_file = open_or_create_file(DB_FILE_PATH)?;
-
-    let mut contents = String::new();
-    db_file.read_to_string(&mut contents)?;
-
-    let mut db = Memdb::deserialize(contents.as_bytes())?;
-
-    let mut log_file = open_or_create_file(LOG_FILE_PATH)?;
-
-    let mut logs = String::new();
-    log_file.read_to_string(&mut logs)?;
-
-    logs.lines().for_each(|log| {
-        let _ = db.exec(log);
-    });
-
-    file_clear(LOG_FILE_PATH)?;
+    let db_file = open_or_create_file(DB_FILE_PATH)?;
+    let log_file = open_or_create_file(LOG_FILE_PATH)?;
+    let db = Memdb::restore(DB_FILE_PATH, LOG_FILE_PATH)?;
 
     let listener = TcpListener::bind("127.0.0.1:3333")?;
 

@@ -3,6 +3,10 @@ use std::collections::HashMap;
 use crate::command::Command;
 use crate::parser;
 
+use std::io::prelude::*;
+
+use crate::utils::fs_utils::{file_clear, open_or_create_file};
+
 type MemdbInner = HashMap<String, Vec<u8>>;
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -15,6 +19,31 @@ impl Memdb {
         Memdb {
             inner: HashMap::new(),
         }
+    }
+
+    pub fn restore(
+        db_file_path: &str,
+        log_file_path: &str,
+    ) -> Result<Memdb, Box<dyn std::error::Error>> {
+        let mut db_file = open_or_create_file(db_file_path)?;
+
+        let mut contents = String::new();
+        db_file.read_to_string(&mut contents)?;
+
+        let mut db = Memdb::deserialize(contents.as_bytes())?;
+
+        let mut log_file = open_or_create_file(log_file_path)?;
+
+        let mut logs = String::new();
+        log_file.read_to_string(&mut logs)?;
+
+        logs.lines().for_each(|log| {
+            let _ = db.exec(log);
+        });
+
+        file_clear(log_file_path)?;
+
+        Ok(db)
     }
 
     /// # Example
