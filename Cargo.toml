@@ -7,7 +7,7 @@ readme = "README.md"
 edition = "2018"
 
 description = "in-memory key-value store"
-keywords = ["tyozo", "kvs", "in-memory", "key value store"]
+keywords = ["tyozo", "kvs", "in-memory", "key-value-store"]
 categories = ["database", "database-implementations"]
 repository = "https://github.com/k-nasa/tyozo"
 documentation = "https://docs.rs/tyozo"
