@@ -16,7 +16,7 @@ documentation = "https://docs.rs/tyozo"
 
 [dependencies]
 ansi_term = "0.12.1"
-log = "0.4.8"
+log = "0.4.11"
 env_logger = "0.7.1"
 
 [[bin]]
